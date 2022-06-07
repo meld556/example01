@@ -13,7 +13,7 @@ public class MemoDAO {
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
 	
-	public ArrayList<MemoDTO> getSelectAll(String searchGubun, String searchData) {
+	public ArrayList<MemoDTO> getSelectAll(String searchGubun, String searchData, int startRecord, int lastRecord) {
 		ArrayList<MemoDTO> list = new ArrayList<>();
 		
 		if(searchGubun == null || searchGubun.trim().equals("")) {
@@ -48,16 +48,29 @@ public class MemoDAO {
 			
 			basicSql += "order by no desc";
 			
-			pstmt = conn.prepareStatement(basicSql);
+			String sql = "";
+			sql += "select * from(select A.*, rownum rnum from (";
+			sql += basicSql;
+			sql += ") A) where rnum between ? and ?";
+			
+			pstmt = conn.prepareStatement(sql);
 			
 			if(searchGubun.equals("") || searchData.equals("")) {
+				pstmt.setInt(1, startRecord);
+				pstmt.setInt(2, lastRecord);
 			} else if(searchGubun.equals("name")) {
 				pstmt.setString(1, searchData);
+				pstmt.setInt(2, startRecord);
+				pstmt.setInt(3, lastRecord);
 			} else if(searchGubun.equals("memo")) {
 				pstmt.setString(1, searchData);
+				pstmt.setInt(2, startRecord);
+				pstmt.setInt(3, lastRecord);
 			} else if(searchGubun.equals("name_memo")) {
 				pstmt.setString(1, searchData);
 				pstmt.setString(2, searchData);
+				pstmt.setInt(3, startRecord);
+				pstmt.setInt(4, lastRecord);
 			}
 			
 			rs = pstmt.executeQuery();
@@ -103,6 +116,61 @@ public class MemoDAO {
 			DB.dbConnClose(rs, pstmt, conn);
 		 }
 		return dto;
+	}
+	
+	public int getTotalRecord(String searchGubun, String searchData) {
+		int result = 0;
+		
+		if(searchGubun == null || searchGubun.trim().equals("")) {
+			searchGubun = "";
+		}
+		
+		if(searchData == null || searchData.trim().equals("")) {
+			searchData = "";
+		} else {
+			searchData = "%" + searchData + "%";
+		}
+		
+		if(searchGubun.equals("") || searchData.equals("")) {
+			searchGubun = "";
+			searchData = "";
+		}
+		
+		try {
+			conn = DB.dbConn();
+			//-------------------------------------------
+			String sql = "select count(*) counter from memo ";
+			
+			if(searchGubun.equals("name")) {
+				sql += "where name like ?";
+			} else if(searchGubun.equals("content")) {
+				sql += "where memo like ?";
+			} else if(searchGubun.equals("name_memo")) {
+				sql += "where name like ? or memo like ?";
+			}
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			if(searchGubun.equals("name")) {
+				pstmt.setString(1, searchData);
+			} else if(searchGubun.equals("memo")) {
+				pstmt.setString(1, searchData);
+			} else if(searchGubun.equals("name_memo")) {
+				pstmt.setString(1, searchData);
+				pstmt.setString(2, searchData);
+			}
+			
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				result = rs.getInt("counter");
+			}
+			//-------------------------------------------
+		 } catch(Exception e) {
+			System.out.println("getTotalRecord 처리중 오류");
+		 } finally {
+			DB.dbConnClose(rs, pstmt, conn);
+		 }
+		return result;
 	}
 	
 	public int setInsert(MemoDTO paramDto) {
