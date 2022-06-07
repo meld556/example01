@@ -43,6 +43,31 @@ public class MemoDAO {
 		return list;
 	}
 	
+	public MemoDTO getSelectOne(MemoDTO paramDto) {
+		MemoDTO dto = new MemoDTO();
+		try {
+			conn = DB.dbConn();
+			//-------------------------------------------
+			String sql = "select * from memo where no = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, paramDto.getNo());
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto.setNo(rs.getInt("no"));
+				dto.setName(rs.getString("name"));
+				dto.setMemo(rs.getString("memo"));
+				dto.setRegiDate(rs.getDate("regiDate"));
+			}
+			//-------------------------------------------
+		 } catch(Exception e) {
+			System.out.println("getSelectOne 처리중 오류");
+		 } finally {
+			DB.dbConnClose(rs, pstmt, conn);
+		 }
+		return dto;
+	}
+	
 	public int setInsert(MemoDTO paramDto) {
 		int result = 0;
 		try {

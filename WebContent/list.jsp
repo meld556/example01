@@ -53,7 +53,7 @@
 				<tr>
 					<td><%=listDto.getNo() %></td>
 					<td><%=listDto.getName() %></td>
-					<td><%=listDto.getMemo() %></td>
+					<td><a href="#" onClick="move('view', '<%=listDto.getNo() %>');"><%=listDto.getMemo() %></a></td>
 					<td><%=listDto.getRegiDate() %></td>
 				</tr>
 				<% 
@@ -72,5 +72,13 @@
 		document.chugaForm.submit();
 	}
 	
+	function move(value1, value2) {
+		var imsi = "";
+		imsi += value1;
+		imsi += '.jsp'
+		imsi += '?no=' + value2;
+
+		location.href = imsi;
+	}
 </script>
 
