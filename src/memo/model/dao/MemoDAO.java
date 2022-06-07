@@ -13,15 +13,52 @@ public class MemoDAO {
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
 	
-	public ArrayList<MemoDTO> getSelectAll() {
+	public ArrayList<MemoDTO> getSelectAll(String searchGubun, String searchData) {
 		ArrayList<MemoDTO> list = new ArrayList<>();
+		
+		if(searchGubun == null || searchGubun.trim().equals("")) {
+			searchGubun = "";
+		}
+		
+		if(searchData == null || searchData.trim().equals("")) {
+			searchData = "";
+		} else {
+			searchData = "%" + searchData + "%";
+		}
+		
+		if(searchGubun.equals("") || searchData.equals("")) {
+			searchGubun = "";
+			searchData = "";
+		}
 		
 		try {
 			conn = DB.dbConn();
 			//-------------------------------------------
-			String sql = "select * from memo ";
+			String basicSql = "select * from memo ";
 			
-			pstmt = conn.prepareStatement(sql);
+			if(searchGubun.equals("") || searchData.equals("")) {
+				
+			} else if(searchGubun.equals("name")) {
+				basicSql += "where name like ?";
+			} else if(searchGubun.equals("memo")) {
+				basicSql += "where memo like ?";
+			} else if(searchGubun.equals("name_memo")) {
+				basicSql += "where name like ? or memo like ?";
+			}
+			
+			basicSql += "order by no desc";
+			
+			pstmt = conn.prepareStatement(basicSql);
+			
+			if(searchGubun.equals("") || searchData.equals("")) {
+			} else if(searchGubun.equals("name")) {
+				pstmt.setString(1, searchData);
+			} else if(searchGubun.equals("memo")) {
+				pstmt.setString(1, searchData);
+			} else if(searchGubun.equals("name_memo")) {
+				pstmt.setString(1, searchData);
+				pstmt.setString(2, searchData);
+			}
 			
 			rs = pstmt.executeQuery();
 			
