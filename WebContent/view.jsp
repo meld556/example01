@@ -47,7 +47,8 @@
 |
 <a href="#" onClick="move('list', '');">목록</a>
 |
-
+<a href="#" onClick="move('sakjeProc', '<%=dto.getNo() %>');">삭제</a>
+|
 
 <script>
 	function move(value1, value2) {

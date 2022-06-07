@@ -88,4 +88,23 @@ public class MemoDAO {
 		return result;
 	}
 	
+	public int setDelete(MemoDTO paramDto) {
+		int result = 0;
+		try {
+			 conn = DB.dbConn();
+			 //-------------------------------------------
+				String sql = "delete from memo where no = ?";
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, paramDto.getNo());
+				result = pstmt.executeUpdate();
+			 //-------------------------------------------
+		 } catch(Exception e) {
+			 
+		 } finally {
+			 DB.dbConnClose(rs, pstmt, conn);
+		 }
+		
+		return result;
+	}
+	
 }
